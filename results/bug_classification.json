@@ -1,0 +1,556 @@
+{
+  "sample_size": 85,
+  "overall": {
+    "Missing Corner Case": 42,
+    "Misinterpretation": 20,
+    "Prompt-biased Code": 5,
+    "Wrong Input Type": 2,
+    "Non-Prompted Consideration": 12,
+    "Wrong Attribute": 1,
+    "Silly Mistake": 1,
+    "Syntax Error": 1,
+    "Hallucinated Object": 1
+  },
+  "per_model": {
+    "llama-3.1-8b": {
+      "Missing Corner Case": 13,
+      "Misinterpretation": 5,
+      "Prompt-biased Code": 1,
+      "Wrong Input Type": 2,
+      "Non-Prompted Consideration": 3,
+      "Wrong Attribute": 1
+    },
+    "llama-3.3-70b": {
+      "Missing Corner Case": 10,
+      "Non-Prompted Consideration": 2,
+      "Prompt-biased Code": 2,
+      "Silly Mistake": 1,
+      "Misinterpretation": 5
+    },
+    "deepseek-v3": {
+      "Missing Corner Case": 10,
+      "Non-Prompted Consideration": 4,
+      "Misinterpretation": 1
+    },
+    "gpt-oss-120b": {
+      "Misinterpretation": 9,
+      "Missing Corner Case": 9,
+      "Syntax Error": 1,
+      "Non-Prompted Consideration": 3,
+      "Prompt-biased Code": 2,
+      "Hallucinated Object": 1
+    }
+  },
+  "classified": [
+    {
+      "task_id": "mbpp/15",
+      "model": "llama-3.1-8b",
+      "error_type": "AssertionError",
+      "tambon_category": "Missing Corner Case"
+    },
+    {
+      "task_id": "HumanEval/76",
+      "model": "llama-3.1-8b",
+      "error_type": "ZeroDivisionError",
+      "tambon_category": "Missing Corner Case"
+    },
+    {
+      "task_id": "mbpp/324",
+      "model": "llama-3.1-8b",
+      "error_type": "AssertionError",
+      "tambon_category": "Misinterpretation"
+    },
+    {
+      "task_id": "mbpp/55",
+      "model": "llama-3.1-8b",
+      "error_type": "AssertionError",
+      "tambon_category": "Prompt-biased Code"
+    },
+    {
+      "task_id": "mbpp/31",
+      "model": "llama-3.1-8b",
+      "error_type": "AssertionError",
+      "tambon_category": "Missing Corner Case"
+    },
+    {
+      "task_id": "mbpp/510",
+      "model": "llama-3.1-8b",
+      "error_type": "AssertionError",
+      "tambon_category": "Missing Corner Case"
+    },
+    {
+      "task_id": "HumanEval/127",
+      "model": "llama-3.1-8b",
+      "error_type": "AssertionError",
+      "tambon_category": "Missing Corner Case"
+    },
+    {
+      "task_id": "mbpp/323",
+      "model": "llama-3.1-8b",
+      "error_type": "AssertionError",
+      "tambon_category": "Missing Corner Case"
+    },
+    {
+      "task_id": "HumanEval/110",
+      "model": "llama-3.1-8b",
+      "error_type": "AssertionError",
+      "tambon_category": "Misinterpretation"
+    },
+    {
+      "task_id": "mbpp/301",
+      "model": "llama-3.1-8b",
+      "error_type": "ValueError",
+      "tambon_category": "Wrong Input Type"
+    },
+    {
+      "task_id": "mbpp/501",
+      "model": "llama-3.1-8b",
+      "error_type": "AssertionError",
+      "tambon_category": "Missing Corner Case"
+    },
+    {
+      "task_id": "mbpp/415",
+      "model": "llama-3.1-8b",
+      "error_type": "AssertionError",
+      "tambon_category": "Missing Corner Case"
+    },
+    {
+      "task_id": "mbpp/216",
+      "model": "llama-3.1-8b",
+      "error_type": "AssertionError",
+      "tambon_category": "Missing Corner Case"
+    },
+    {
+      "task_id": "HumanEval/100",
+      "model": "llama-3.1-8b",
+      "error_type": "AssertionError",
+      "tambon_category": "Missing Corner Case"
+    },
+    {
+      "task_id": "mbpp/243",
+      "model": "llama-3.1-8b",
+      "error_type": "AssertionError",
+      "tambon_category": "Non-Prompted Consideration"
+    },
+    {
+      "task_id": "mbpp/143",
+      "model": "llama-3.1-8b",
+      "error_type": "AssertionError",
+      "tambon_category": "Misinterpretation"
+    },
+    {
+      "task_id": "HumanEval/67",
+      "model": "llama-3.1-8b",
+      "error_type": "ValueError",
+      "tambon_category": "Wrong Input Type"
+    },
+    {
+      "task_id": "HumanEval/65",
+      "model": "llama-3.1-8b",
+      "error_type": "AssertionError",
+      "tambon_category": "Misinterpretation"
+    },
+    {
+      "task_id": "HumanEval/103",
+      "model": "llama-3.1-8b",
+      "error_type": "AssertionError",
+      "tambon_category": "Non-Prompted Consideration"
+    },
+    {
+      "task_id": "mbpp/11",
+      "model": "llama-3.1-8b",
+      "error_type": "AttributeError",
+      "tambon_category": "Wrong Attribute"
+    },
+    {
+      "task_id": "mbpp/20",
+      "model": "llama-3.1-8b",
+      "error_type": "AssertionError",
+      "tambon_category": "Missing Corner Case"
+    },
+    {
+      "task_id": "mbpp/185",
+      "model": "llama-3.1-8b",
+      "error_type": "AssertionError",
+      "tambon_category": "Missing Corner Case"
+    },
+    {
+      "task_id": "mbpp/248",
+      "model": "llama-3.1-8b",
+      "error_type": "AssertionError",
+      "tambon_category": "Misinterpretation"
+    },
+    {
+      "task_id": "HumanEval/54",
+      "model": "llama-3.1-8b",
+      "error_type": "AssertionError",
+      "tambon_category": "Non-Prompted Consideration"
+    },
+    {
+      "task_id": "mbpp/223",
+      "model": "llama-3.1-8b",
+      "error_type": "AssertionError",
+      "tambon_category": "Missing Corner Case"
+    },
+    {
+      "task_id": "mbpp/122",
+      "model": "llama-3.3-70b",
+      "error_type": "AssertionError",
+      "tambon_category": "Missing Corner Case"
+    },
+    {
+      "task_id": "mbpp/444",
+      "model": "llama-3.3-70b",
+      "error_type": "AssertionError",
+      "tambon_category": "Missing Corner Case"
+    },
+    {
+      "task_id": "mbpp/311",
+      "model": "llama-3.3-70b",
+      "error_type": "AssertionError",
+      "tambon_category": "Missing Corner Case"
+    },
+    {
+      "task_id": "mbpp/138",
+      "model": "llama-3.3-70b",
+      "error_type": "AssertionError",
+      "tambon_category": "Missing Corner Case"
+    },
+    {
+      "task_id": "mbpp/326",
+      "model": "llama-3.3-70b",
+      "error_type": "AssertionError",
+      "tambon_category": "Non-Prompted Consideration"
+    },
+    {
+      "task_id": "mbpp/510",
+      "model": "llama-3.3-70b",
+      "error_type": "AssertionError",
+      "tambon_category": "Missing Corner Case"
+    },
+    {
+      "task_id": "mbpp/185",
+      "model": "llama-3.3-70b",
+      "error_type": "AssertionError",
+      "tambon_category": "Prompt-biased Code"
+    },
+    {
+      "task_id": "HumanEval/32",
+      "model": "llama-3.3-70b",
+      "error_type": "TimeoutError",
+      "tambon_category": "Silly Mistake"
+    },
+    {
+      "task_id": "mbpp/86",
+      "model": "llama-3.3-70b",
+      "error_type": "AssertionError",
+      "tambon_category": "Misinterpretation"
+    },
+    {
+      "task_id": "mbpp/312",
+      "model": "llama-3.3-70b",
+      "error_type": "AssertionError",
+      "tambon_category": "Prompt-biased Code"
+    },
+    {
+      "task_id": "mbpp/245",
+      "model": "llama-3.3-70b",
+      "error_type": "AssertionError",
+      "tambon_category": "Missing Corner Case"
+    },
+    {
+      "task_id": "mbpp/85",
+      "model": "llama-3.3-70b",
+      "error_type": "AssertionError",
+      "tambon_category": "Misinterpretation"
+    },
+    {
+      "task_id": "mbpp/136",
+      "model": "llama-3.3-70b",
+      "error_type": "AssertionError",
+      "tambon_category": "Missing Corner Case"
+    },
+    {
+      "task_id": "mbpp/239",
+      "model": "llama-3.3-70b",
+      "error_type": "AssertionError",
+      "tambon_category": "Missing Corner Case"
+    },
+    {
+      "task_id": "HumanEval/160",
+      "model": "llama-3.3-70b",
+      "error_type": "AssertionError",
+      "tambon_category": "Missing Corner Case"
+    },
+    {
+      "task_id": "HumanEval/140",
+      "model": "llama-3.3-70b",
+      "error_type": "AssertionError",
+      "tambon_category": "Misinterpretation"
+    },
+    {
+      "task_id": "mbpp/279",
+      "model": "llama-3.3-70b",
+      "error_type": "AssertionError",
+      "tambon_category": "Misinterpretation"
+    },
+    {
+      "task_id": "HumanEval/141",
+      "model": "llama-3.3-70b",
+      "error_type": "IndexError",
+      "tambon_category": "Missing Corner Case"
+    },
+    {
+      "task_id": "mbpp/255",
+      "model": "llama-3.3-70b",
+      "error_type": "AssertionError",
+      "tambon_category": "Misinterpretation"
+    },
+    {
+      "task_id": "mbpp/246",
+      "model": "llama-3.3-70b",
+      "error_type": "AssertionError",
+      "tambon_category": "Non-Prompted Consideration"
+    },
+    {
+      "task_id": "mbpp/351",
+      "model": "deepseek-v3",
+      "error_type": "AssertionError",
+      "tambon_category": "Missing Corner Case"
+    },
+    {
+      "task_id": "mbpp/136",
+      "model": "deepseek-v3",
+      "error_type": "AssertionError",
+      "tambon_category": "Missing Corner Case"
+    },
+    {
+      "task_id": "HumanEval/83",
+      "model": "deepseek-v3",
+      "error_type": "AssertionError",
+      "tambon_category": "Missing Corner Case"
+    },
+    {
+      "task_id": "mbpp/448",
+      "model": "deepseek-v3",
+      "error_type": "AssertionError",
+      "tambon_category": "Missing Corner Case"
+    },
+    {
+      "task_id": "mbpp/243",
+      "model": "deepseek-v3",
+      "error_type": "AssertionError",
+      "tambon_category": "Non-Prompted Consideration"
+    },
+    {
+      "task_id": "mbpp/304",
+      "model": "deepseek-v3",
+      "error_type": "AssertionError",
+      "tambon_category": "Missing Corner Case"
+    },
+    {
+      "task_id": "mbpp/31",
+      "model": "deepseek-v3",
+      "error_type": "AssertionError",
+      "tambon_category": "Missing Corner Case"
+    },
+    {
+      "task_id": "mbpp/190",
+      "model": "deepseek-v3",
+      "error_type": "AssertionError",
+      "tambon_category": "Non-Prompted Consideration"
+    },
+    {
+      "task_id": "HumanEval/145",
+      "model": "deepseek-v3",
+      "error_type": "AssertionError",
+      "tambon_category": "Non-Prompted Consideration"
+    },
+    {
+      "task_id": "mbpp/310",
+      "model": "deepseek-v3",
+      "error_type": "AssertionError",
+      "tambon_category": "Misinterpretation"
+    },
+    {
+      "task_id": "mbpp/144",
+      "model": "deepseek-v3",
+      "error_type": "AssertionError",
+      "tambon_category": "Non-Prompted Consideration"
+    },
+    {
+      "task_id": "mbpp/362",
+      "model": "deepseek-v3",
+      "error_type": "AssertionError",
+      "tambon_category": "Missing Corner Case"
+    },
+    {
+      "task_id": "mbpp/355",
+      "model": "deepseek-v3",
+      "error_type": "AssertionError",
+      "tambon_category": "Missing Corner Case"
+    },
+    {
+      "task_id": "mbpp/185",
+      "model": "deepseek-v3",
+      "error_type": "AssertionError",
+      "tambon_category": "Missing Corner Case"
+    },
+    {
+      "task_id": "mbpp/324",
+      "model": "deepseek-v3",
+      "error_type": "AssertionError",
+      "tambon_category": "Missing Corner Case"
+    },
+    {
+      "task_id": "HumanEval/32",
+      "model": "gpt-oss-120b",
+      "error_type": "AssertionError",
+      "tambon_category": "Misinterpretation"
+    },
+    {
+      "task_id": "HumanEval/106",
+      "model": "gpt-oss-120b",
+      "error_type": "AssertionError",
+      "tambon_category": "Missing Corner Case"
+    },
+    {
+      "task_id": "HumanEval/110",
+      "model": "gpt-oss-120b",
+      "error_type": "SyntaxError",
+      "tambon_category": "Syntax Error"
+    },
+    {
+      "task_id": "HumanEval/116",
+      "model": "gpt-oss-120b",
+      "error_type": "AssertionError",
+      "tambon_category": "Non-Prompted Consideration"
+    },
+    {
+      "task_id": "HumanEval/145",
+      "model": "gpt-oss-120b",
+      "error_type": "AssertionError",
+      "tambon_category": "Non-Prompted Consideration"
+    },
+    {
+      "task_id": "mbpp/13",
+      "model": "gpt-oss-120b",
+      "error_type": "AssertionError",
+      "tambon_category": "Non-Prompted Consideration"
+    },
+    {
+      "task_id": "mbpp/48",
+      "model": "gpt-oss-120b",
+      "error_type": "AssertionError",
+      "tambon_category": "Misinterpretation"
+    },
+    {
+      "task_id": "mbpp/103",
+      "model": "gpt-oss-120b",
+      "error_type": "IndexError",
+      "tambon_category": "Missing Corner Case"
+    },
+    {
+      "task_id": "mbpp/122",
+      "model": "gpt-oss-120b",
+      "error_type": "AssertionError",
+      "tambon_category": "Missing Corner Case"
+    },
+    {
+      "task_id": "mbpp/143",
+      "model": "gpt-oss-120b",
+      "error_type": "AssertionError",
+      "tambon_category": "Misinterpretation"
+    },
+    {
+      "task_id": "mbpp/155",
+      "model": "gpt-oss-120b",
+      "error_type": "AssertionError",
+      "tambon_category": "Missing Corner Case"
+    },
+    {
+      "task_id": "mbpp/214",
+      "model": "gpt-oss-120b",
+      "error_type": "AssertionError",
+      "tambon_category": "Misinterpretation"
+    },
+    {
+      "task_id": "mbpp/235",
+      "model": "gpt-oss-120b",
+      "error_type": "AssertionError",
+      "tambon_category": "Missing Corner Case"
+    },
+    {
+      "task_id": "mbpp/310",
+      "model": "gpt-oss-120b",
+      "error_type": "AssertionError",
+      "tambon_category": "Misinterpretation"
+    },
+    {
+      "task_id": "mbpp/312",
+      "model": "gpt-oss-120b",
+      "error_type": "AssertionError",
+      "tambon_category": "Prompt-biased Code"
+    },
+    {
+      "task_id": "mbpp/313",
+      "model": "gpt-oss-120b",
+      "error_type": "AssertionError",
+      "tambon_category": "Misinterpretation"
+    },
+    {
+      "task_id": "mbpp/314",
+      "model": "gpt-oss-120b",
+      "error_type": "AssertionError",
+      "tambon_category": "Missing Corner Case"
+    },
+    {
+      "task_id": "mbpp/362",
+      "model": "gpt-oss-120b",
+      "error_type": "AssertionError",
+      "tambon_category": "Missing Corner Case"
+    },
+    {
+      "task_id": "mbpp/367",
+      "model": "gpt-oss-120b",
+      "error_type": "NameError",
+      "tambon_category": "Hallucinated Object"
+    },
+    {
+      "task_id": "mbpp/383",
+      "model": "gpt-oss-120b",
+      "error_type": "AssertionError",
+      "tambon_category": "Missing Corner Case"
+    },
+    {
+      "task_id": "mbpp/386",
+      "model": "gpt-oss-120b",
+      "error_type": "AssertionError",
+      "tambon_category": "Missing Corner Case"
+    },
+    {
+      "task_id": "mbpp/396",
+      "model": "gpt-oss-120b",
+      "error_type": "AssertionError",
+      "tambon_category": "Misinterpretation"
+    },
+    {
+      "task_id": "mbpp/436",
+      "model": "gpt-oss-120b",
+      "error_type": "AssertionError",
+      "tambon_category": "Misinterpretation"
+    },
+    {
+      "task_id": "mbpp/461",
+      "model": "gpt-oss-120b",
+      "error_type": "AssertionError",
+      "tambon_category": "Misinterpretation"
+    },
+    {
+      "task_id": "mbpp/488",
+      "model": "gpt-oss-120b",
+      "error_type": "AssertionError",
+      "tambon_category": "Prompt-biased Code"
+    }
+  ]
+}

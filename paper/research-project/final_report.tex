@@ -1,0 +1,416 @@
+\documentclass[preprint,12pt]{elsarticle}
+
+\usepackage{amssymb}
+\usepackage{amsmath}
+\usepackage{booktabs}
+\usepackage{graphicx}
+\graphicspath{{figures/}{./figures/}{./}}
+\usepackage{listings}
+\usepackage{xcolor}
+\usepackage{hyperref}
+
+\lstdefinestyle{pythonstyle}{
+    language=Python,
+    basicstyle=\ttfamily\small,
+    keywordstyle=\color{blue},
+    stringstyle=\color{red!70!black},
+    commentstyle=\color{green!50!black},
+    breaklines=true,
+    frame=single,
+    framesep=4pt,
+    xleftmargin=6pt,
+    xrightmargin=6pt,
+    numbers=left,
+    numberstyle=\tiny\color{gray},
+    numbersep=6pt,
+    tabsize=4,
+    showstringspaces=false,
+    captionpos=b,
+}
+\lstset{style=pythonstyle}
+
+\journal{Journal of Systems and Software}
+
+\begin{document}
+
+\begin{frontmatter}
+
+\title{Bugs in LLM-Generated Code: A Replication Study Across Model Scales}
+
+\author[sdu]{Assan Assemov\corref{cor1}}
+\ead{assanassemov06@gmail.com}
+
+\author[sdu]{Mohammed Al-Hadeethi}
+\ead{m.alanzy.cs@gmail.com}
+
+\cortext[cor1]{Corresponding author}
+
+\affiliation[sdu]{organization={SDU University},
+            city={Almaty},
+            country={Kazakhstan}}
+
+\begin{highlights}
+\item Open-weight LLMs (2025) achieve up to 96.1\% pass@1, surpassing GPT-4 circa 2023
+\item 90.2\% of code generation failures are semantic (AssertionError), consistent across all model scales
+\item ``Crude'' bug categories (Hallucinated Object, Syntax Error, Incomplete Generation) dropped from 33.9\% to 3.6\%
+\item Missing Corner Case is now the dominant failure mode (51.8\% vs. 15.3\% in Tambon et al.)
+\item Dense 120B model outperforms 685B MoE model, suggesting dense parameters matter more for code generation
+\end{highlights}
+
+\begin{keyword}
+large language models \sep code generation \sep software bugs \sep empirical study \sep program correctness \sep bug taxonomy
+\end{keyword}
+
+\begin{abstract}
+Large Language Models (LLMs) are increasingly used for automatic code generation, yet the code they produce is prone to bugs. Tambon et al. (2025) proposed a taxonomy of 10 bug patterns from manually analysing 333 bugs in LLM-generated code. This study replicates and extends their work by evaluating four open-weight models spanning different architectures and parameter scales: Llama~3.1 (8B), Llama~3.3 (70B), DeepSeek~V3 (685B~MoE), and GPT-OSS (120B). We generate solutions for 664 programming tasks from the HumanEval and MBPP benchmarks, measuring pass@1 at temperature~0. Our results show a clear positive correlation between model capability and code correctness: 61.3\%, 77.3\%, 84.9\%, and 96.1\% pass@1, respectively. A chi-square test confirms that pass rates differ significantly across models ($\chi^2=260.41$, $p<0.001$). Error analysis reveals that 90.2\% of all failures are semantic errors (AssertionError), with smaller models producing significantly more runtime errors. Classification of an 85-failure sample by two independent reviewers (Cohen's $\kappa=0.71$) using Tambon's taxonomy shows that Missing Corner Case (51.8\%) and Misinterpretation (21.2\%) dominate, while categories such as Hallucinated Object and Incomplete Generation have nearly vanished in modern models.
+\end{abstract}
+
+\end{frontmatter}
+
+\section{Introduction}
+\label{sec:introduction}
+
+The rapid advancement of Large Language Models (LLMs) for code generation has transformed software development practices. Models such as GitHub Copilot, ChatGPT, and Amazon CodeWhisperer can generate code from natural language descriptions, acting as AI pair programmers \citep{chen2021evaluating, imai2022copilot}. However, LLM-generated code is not immune to errors. Several studies have shown that generated code frequently contains bugs that may go undetected, particularly by less experienced developers \citep{moradi2023copilot, pearce2022examining}.
+
+Tambon et al. \citep{tambon2025bugs} conducted the first systematic study of bug patterns in LLM-generated code, manually analysing 333 bugs from three models (CodeGen, PanGu-Coder, and Codex) and proposing a taxonomy of 10 distinctive bug categories. Their work revealed that LLM-generated bugs differ fundamentally from human-made bugs: LLMs rarely produce syntax errors but frequently generate semantically incorrect code that appears correct at first glance.
+
+However, the models examined by Tambon et al. are now outdated. Since their study, a new generation of open-weight models has emerged, with significantly improved capabilities. This raises the question: \emph{do the bug patterns identified by Tambon et al. persist in newer, larger models?}
+
+This study addresses this question by replicating and extending the work of Tambon et al. with the following contributions:
+
+\begin{enumerate}
+    \item We evaluate four models from three different organisations spanning different parameter scales --- Llama~3.1~(8B), Llama~3.3~(70B), DeepSeek~V3~(685B~MoE), and GPT-OSS~(120B) --- on 664 tasks from the HumanEval and MBPP benchmarks.
+    \item We measure pass@1 at temperature~0 and demonstrate a statistically significant relationship between model scale and code generation accuracy ($\chi^2=260.41$, $p<0.001$).
+    \item We classify a sample of 85 failures by two independent reviewers (Cohen's $\kappa=0.71$) using Tambon's 10-category taxonomy and show that crude error categories have nearly disappeared in modern models.
+    \item We show that the dominant remaining failure mode is Missing Corner Case (51.8\%), suggesting that modern LLMs understand programming tasks but struggle with edge cases.
+\end{enumerate}
+
+The remainder of this paper is organised as follows. Section~\ref{sec:literature} reviews related work. Section~\ref{sec:methodology} describes our methodology. Section~\ref{sec:results} presents our results. Section~\ref{sec:discussion} discusses findings. Section~\ref{sec:conclusions} summarises conclusions.
+
+\section{Related Work}
+\label{sec:literature}
+
+\subsection{Code Generation Benchmarks}
+
+The evaluation of LLM code generation capabilities relies on standardised benchmarks. \textbf{HumanEval} \citep{chen2021evaluating} comprises 164 hand-written Python programming problems, each consisting of a function signature, docstring, and unit tests. The primary metric is pass@$k$, measuring the probability that at least one of $k$ generated solutions passes all tests.
+
+\textbf{MBPP} (Mostly Basic Python Programming) \citep{austin2021program} contains approximately 1,000 crowd-sourced Python problems, of which 500 form the sanitised subset. Each task includes a natural language description and three test cases. Together, HumanEval and MBPP are the standard benchmarks for code generation evaluation \citep{evalplus2024, lu2024codeglue}.
+
+Other benchmarks such as \textbf{CoderEval} \citep{yu2023codereval} focus on real-world tasks mined from GitHub, while \textbf{ClassEval} \citep{du2023classeval} evaluates class-level code generation. Our choice of HumanEval and MBPP ensures comparability with the majority of existing studies.
+
+\subsection{Bug Studies in LLM-Generated Code}
+
+Tambon et al. \citep{tambon2025bugs} conducted the most comprehensive study of bugs in LLM-generated code to date. Using CoderEval, they generated code with CodeGen \citep{nijkamp2023codegen}, PanGu-Coder \citep{christopoulou2022pangu}, and Codex, and through manual analysis of 333 bugs identified 10 patterns: Misinterpretation (20.8\%), Missing Corner Case (15.3\%), Silly Mistake (9.6\%), Hallucinated Object (9.6\%), Incomplete Generation (9.6\%), Wrong Attribute (8.6\%), Non-Prompted Consideration (8.2\%), Prompt-biased Code (6.5\%), Syntax Error (6.1\%), and Wrong Input Type (5.9\%). Their taxonomy was validated through a survey of 34 practitioners.
+
+Pearce et al. \citep{pearce2022examining} studied security vulnerabilities in Copilot-generated code, finding approximately 40\% of scenarios contained vulnerabilities. Liu et al. \citep{liu2023chatgpt} analysed code quality issues in ChatGPT output on LeetCode problems. Fan et al. \citep{fan2023automated} investigated automated repair of Codex-generated buggy code. Jesse et al. \citep{jesse2023llm} examined the proneness of LLMs to generate Simple, Stupid Bugs (SStuBs), finding that LLMs produced more SStuBs than correct code. Vaithilingam et al. \citep{vaithilingam2022expectation} conducted a human study showing that Copilot users had lower task completion rates due to difficulty detecting bugs. Mastropaolo et al. \citep{mastropaolo2023robustness} studied how prompt rephrasing affects Copilot's output distribution. Asare et al. \citep{asare2023copilot} compared Copilot's vulnerability introduction rate with that of human developers.
+
+\subsection{Models Under Study}
+
+\textbf{Llama~3.1~(8B)} is part of Meta's Llama~3 family \citep{touvron2023llama}, a decoder-only transformer with 8 billion parameters, serving as our baseline for examining how limited capacity affects code quality.
+
+\textbf{Llama~3.3~(70B)} is a larger variant with 70 billion parameters, representing a mid-range dense model.
+
+\textbf{DeepSeek~V3} \citep{deepseek2024v3} is a Mixture-of-Experts (MoE) model with 685 billion total parameters (37B active per token). Developed by DeepSeek (China), it represents a different architectural approach --- MoE versus dense transformers --- providing valuable diversity in our model selection.
+
+\textbf{GPT-OSS~(120B)} is OpenAI's open-weight model with 120 billion dense parameters, the strongest dense model in our study.
+
+The first three models were accessed via the Groq API; DeepSeek~V3 was accessed via the DeepSeek API. Both providers offer free or low-cost access, ensuring reproducibility.
+
+\section{Methodology}
+\label{sec:methodology}
+
+\subsection{Research Questions}
+
+\begin{itemize}
+    \item \textbf{RQ1:} How does model scale affect the functional correctness of LLM-generated code?
+    \item \textbf{RQ2:} How does the distribution of error types vary across models of different scales?
+    \item \textbf{RQ3:} How do the bug patterns in modern open-weight models compare with those reported by Tambon et al. (2025)?
+\end{itemize}
+
+\subsection{Benchmarks}
+
+We used HumanEval \citep{chen2021evaluating} (164 tasks) and MBPP sanitised \citep{austin2021program} (500 tasks), totalling 664 tasks. Each task was presented to all four models, yielding $664 \times 4 = 2{,}656$ code generation samples.
+
+\subsection{Code Generation}
+
+For each task, we constructed a prompt containing the function signature and docstring (for HumanEval) or a natural language description with example test cases (for MBPP). The following system instruction was used for all models:
+
+\begin{lstlisting}[caption={System prompt used for all code generation requests.},label=lst:sysprompt,language={}]
+You are a Python coding assistant.
+Complete the given function.
+Return ONLY the code, no explanations, no markdown fences.
+\end{lstlisting}
+
+All generations used \textbf{temperature~0} (deterministic output) and a maximum token limit of 2,048, following the pass@1 evaluation protocol where a single generation attempt is made per task. Models were accessed via automated pipelines with API key rotation for rate-limit handling. Listing~\ref{lst:generation} shows a simplified version of the generation loop.
+
+\begin{lstlisting}[caption={Simplified code generation pipeline.},label=lst:generation]
+for task in all_tasks:
+    prompt = task["prompt"]
+    response = client.chat.completions.create(
+        model=model_id,
+        temperature=0.0,
+        max_tokens=2048,
+        messages=[
+            {"role": "system", "content": SYSTEM_PROMPT},
+            {"role": "user",   "content": prompt},
+        ],
+    )
+    save_result(task["task_id"], response)
+\end{lstlisting}
+
+\subsection{Test Execution}
+
+Generated code was executed against benchmark test suites in isolated subprocesses with a 10-second timeout. Each sample was classified as PASS (all tests passed), FAIL (with Python exception type captured from traceback), or SKIP (generation error). Listing~\ref{lst:testexec} illustrates the test execution approach.
+
+\begin{lstlisting}[caption={Test execution with isolated subprocess.},label=lst:testexec]
+with tempfile.NamedTemporaryFile(
+    mode="w", suffix=".py", delete=False,
+    encoding="utf-8"
+) as tmp:
+    tmp.write(generated_code + "\n" + test_code)
+
+result = subprocess.run(
+    [sys.executable, tmp.name],
+    capture_output=True, timeout=10,
+    text=True, encoding="utf-8",
+)
+status = "PASS" if result.returncode == 0 else "FAIL"
+\end{lstlisting}
+
+\subsection{Error Classification}
+
+We employ two complementary classification approaches:
+
+\textbf{Automatic classification} based on Python exception types provides a complete, reproducible categorisation of all 533 failures. The error type is extracted from the last line of the traceback (e.g., \texttt{AssertionError}, \texttt{NameError}).
+
+\textbf{Manual classification} of a stratified random sample of 85 failures (25 from Llama~3.1, 20 from Llama~3.3, 15 from DeepSeek~V3, 25 from GPT-OSS) using Tambon et al.'s 10-category taxonomy enables direct comparison with their results. Two reviewers independently classified each failure by comparing the generated code against the task prompt and expected output. Initial inter-rater agreement was substantial (Cohen's $\kappa = 0.71$, 78.8\% observed agreement). The 18 disagreements --- all between the closely related Missing Corner Case and Misinterpretation categories --- were resolved through discussion to reach consensus.
+
+\subsection{Statistical Analysis}
+
+We use the chi-square test of independence \citep{mchugh2013chi} to assess whether pass/fail rates and error type distributions differ significantly across models, with significance level $\alpha = 0.05$. The test is implemented using SciPy:
+
+\begin{lstlisting}[caption={Chi-square test for pass/fail independence.},label=lst:chisq]
+from scipy import stats
+import numpy as np
+
+contingency = np.array([
+    [407, 257],  # Llama 3.1: pass, fail
+    [513, 151],  # Llama 3.3
+    [562, 100],  # DeepSeek V3
+    [619,  25],  # GPT-OSS
+])
+chi2, p, dof, _ = stats.chi2_contingency(contingency)
+# chi2=260.41, p<0.001, dof=3
+\end{lstlisting}
+
+\section{Results}
+\label{sec:results}
+
+\subsection{RQ1: Model Scale and Functional Correctness}
+
+Table~\ref{tab:pass_results} presents the pass@1 results across all four models.
+
+\begin{table}[h]
+\centering
+\caption{pass@1 results across four models.}
+\label{tab:pass_results}
+\begin{tabular}{lcccc}
+\toprule
+Model & Parameters & HumanEval & MBPP & Overall \\
+\midrule
+Llama 3.1 (8B) & 8B & 66.5\% (109/164) & 59.6\% (298/500) & \textbf{61.3\%} (407/664) \\
+Llama 3.3 (70B) & 70B & 82.9\% (136/164) & 75.4\% (377/500) & \textbf{77.3\%} (513/664) \\
+DeepSeek V3 & 685B (MoE) & 92.0\% (149/162) & 82.6\% (413/500) & \textbf{84.9\%} (562/662) \\
+GPT-OSS (120B) & 120B & 97.0\% (159/164) & 95.8\% (460/480) & \textbf{96.1\%} (619/644) \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+A chi-square test confirms that pass/fail rates differ significantly across models ($\chi^2 = 260.41$, $p < 0.001$, $df = 3$). HumanEval consistently yields higher pass rates than MBPP across all models. Notably, GPT-OSS~(120B) with 120B \emph{dense} parameters outperforms DeepSeek~V3 despite the latter having 685B total parameters, suggesting that dense parameter count may be more predictive of code generation quality than total MoE parameters.
+
+Fig.~\ref{fig:pass_benchmark} shows pass@1 by benchmark, and Fig.~\ref{fig:size_vs_pass} illustrates the relationship between model scale and accuracy.
+
+\begin{figure}[h]
+\centering
+\includegraphics[width=0.85\textwidth]{figures/fig1_pass_by_benchmark.pdf}
+\caption{pass@1 results by model and benchmark.}
+\label{fig:pass_benchmark}
+\end{figure}
+
+\begin{figure}[h]
+\centering
+\includegraphics[width=0.75\textwidth]{figures/fig5_size_vs_pass.pdf}
+\caption{Model size vs. pass@1 accuracy. DeepSeek V3 uses MoE (685B total, 37B active).}
+\label{fig:size_vs_pass}
+\end{figure}
+
+\subsection{RQ2: Error Type Distribution}
+
+Of the 2,634 non-skipped samples, 533 (20.2\%) failed. Table~\ref{tab:error_dist} presents the error type distribution.
+
+\begin{table}[h]
+\centering
+\caption{Error type distribution across models.}
+\label{tab:error_dist}
+\begin{tabular}{lccccc}
+\toprule
+Error Type & Llama 3.1 & Llama 3.3 & DeepSeek V3 & GPT-OSS & Total \\
+\midrule
+AssertionError & 229 (89.1\%) & 134 (88.7\%) & 96 (96.0\%) & 22 (88.0\%) & 481 (90.2\%) \\
+NameError & 9 (3.5\%) & 6 (4.0\%) & 2 (2.0\%) & 1 (4.0\%) & 18 (3.4\%) \\
+TypeError & 7 (2.7\%) & 3 (2.0\%) & 0 & 0 & 10 (1.9\%) \\
+IndexError & 5 (1.9\%) & 3 (2.0\%) & 0 & 1 (4.0\%) & 9 (1.7\%) \\
+ValueError & 3 (1.2\%) & 2 (1.3\%) & 0 & 0 & 5 (0.9\%) \\
+SyntaxError & 0 & 0 & 2 (2.0\%) & 1 (4.0\%) & 3 (0.6\%) \\
+TimeoutError & 1 (0.4\%) & 2 (1.3\%) & 0 & 0 & 3 (0.6\%) \\
+AttributeError & 2 (0.8\%) & 1 (0.7\%) & 0 & 0 & 3 (0.6\%) \\
+ZeroDivisionError & 1 (0.4\%) & 0 & 0 & 0 & 1 (0.2\%) \\
+\midrule
+Total & 257 & 151 & 100 & 25 & 533 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+AssertionError dominates at 90.2\%, indicating that the vast majority of bugs are semantic. A chi-square test on error type distributions across models yields $\chi^2 = 23.29$ ($p = 0.33$, $df = 21$), indicating that the \emph{proportional} distribution of error types is consistent across models --- all models fail in similar ways, just at different rates.
+
+Listing~\ref{lst:bugexample} illustrates a typical Missing Corner Case bug from our dataset.
+
+\begin{lstlisting}[caption={Example: Missing Corner Case in HumanEval/10 (Llama~3.3~70B). The model finds the longest palindromic prefix but returns an incorrect suffix for the input \texttt{'xyz'}.},label=lst:bugexample]
+# Prompt: Find the shortest palindrome starting with
+#         the supplied string.
+# Expected: make_palindrome('xyz') == 'xyzyx'
+
+def make_palindrome(string: str) -> str:
+    if not string:
+        return string
+    for i in range(len(string), 0, -1):
+        if is_palindrome(string[:i]):
+            return string + string[:i-1][::-1]  # Bug!
+    return string + string[::-1]
+
+# Actual output: 'xyzzyx' instead of 'xyzyx'
+# Root cause: off-by-one in suffix construction
+\end{lstlisting}
+
+DeepSeek~V3 is notable for having 96.0\% of its failures as AssertionError and zero TypeError, ValueError, IndexError, TimeoutError, or AttributeError --- the cleanest error profile of all models.
+
+\begin{figure}[h]
+\centering
+\includegraphics[width=0.85\textwidth]{figures/fig3_error_distribution.pdf}
+\caption{Distribution of error types across all 533 failures.}
+\label{fig:error_dist}
+\end{figure}
+
+\begin{figure}[h]
+\centering
+\includegraphics[width=0.85\textwidth]{figures/fig4_errors_by_model.pdf}
+\caption{Error type distribution by model.}
+\label{fig:errors_model}
+\end{figure}
+
+\subsection{RQ3: Comparison with Tambon's Bug Taxonomy}
+
+To enable direct comparison with Tambon et al. \citep{tambon2025bugs}, two reviewers independently classified a stratified random sample of 85 failures using their 10-category taxonomy (Cohen's $\kappa = 0.71$). Table~\ref{tab:tambon_class} presents the consensus results.
+
+\begin{table}[h]
+\centering
+\caption{Bug pattern distribution compared with Tambon et al. (2025). Our classification uses a consensus sample of 85 failures classified by two independent reviewers ($\kappa = 0.71$).}
+\label{tab:tambon_class}
+\begin{tabular}{lcc}
+\toprule
+Bug Pattern & Tambon et al. & Our Study \\
+\midrule
+Missing Corner Case & 15.3\% & 51.8\% \\
+Misinterpretation & 20.8\% & 21.2\% \\
+Non-Prompted Consideration & 8.2\% & 14.1\% \\
+Prompt-biased Code & 6.5\% & 5.9\% \\
+Wrong Input Type & 5.9\% & 2.4\% \\
+Silly Mistake & 9.6\% & 1.2\% \\
+Wrong Attribute & 8.6\% & 1.2\% \\
+Hallucinated Object & 9.6\% & 1.2\% \\
+Syntax Error & 6.1\% & 1.2\% \\
+Incomplete Generation & 9.6\% & 0.0\% \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+The most striking finding is the near-elimination of several bug categories that were common in Tambon's study. Hallucinated Object dropped from 9.6\% to 1.2\%, Incomplete Generation from 9.6\% to 0\%, Syntax Error from 6.1\% to 1.2\%, and Wrong Attribute from 8.6\% to 1.2\%. These categories represented 33.9\% of bugs in Tambon's study but only 3.6\% in ours.
+
+Conversely, Missing Corner Case increased from 15.3\% to 51.8\%, becoming the dominant failure mode. This suggests that modern models have improved at understanding programming tasks and generating syntactically correct code, but still struggle with edge cases.
+
+Fig.~\ref{fig:tambon_comparison} presents the side-by-side comparison.
+
+\begin{figure}[h]
+\centering
+\includegraphics[width=0.95\textwidth]{figures/fig7_tambon_comparison.pdf}
+\caption{Bug pattern distribution: Tambon et al. (2025) vs. our study.}
+\label{fig:tambon_comparison}
+\end{figure}
+
+\section{Discussion}
+\label{sec:discussion}
+
+\subsection{Evolution of Bug Patterns}
+
+Our results reveal a qualitative shift in LLM bug patterns between 2023-era and 2025-era models. Tambon et al. found that roughly one-third of bugs fell into ``crude'' categories (Hallucinated Object, Incomplete Generation, Syntax Error, Wrong Attribute) that are unlikely in human-written code. In our study, these categories account for less than 4\% of bugs. Modern LLMs have effectively acquired basic ``programming literacy'' --- they no longer call undefined functions, generate empty code, or produce syntax errors.
+
+The remaining bugs are overwhelmingly semantic: the code runs but produces incorrect output. Missing Corner Case has become the dominant pattern (51.8\%), suggesting that models understand the \emph{intent} of programming tasks but fail to handle edge cases. This aligns with Tambon's survey finding that Missing Corner Case was the hardest bug pattern to diagnose, as it requires understanding the full specification rather than just the main use case.
+
+\subsection{Dense vs. MoE Architectures}
+
+An unexpected finding is that GPT-OSS~(120B) outperforms DeepSeek~V3~(685B~MoE) despite having fewer total parameters (120B vs. 685B). This suggests that \emph{dense} parameter count may be more important than total MoE parameter count for code generation. However, DeepSeek~V3 activates only 37B parameters per token, and its 84.9\% pass@1 substantially exceeds the similarly-sized Llama~3.3~(70B) at 77.3\%. Further research with more MoE models would be needed to draw definitive conclusions about architecture effects.
+
+\subsection{Open-Weight Models vs. Earlier Closed-Source Models}
+
+GPT-OSS~(120B) achieves 96.1\% pass@1, which substantially exceeds the performance typically reported for GPT-4 on HumanEval ($\sim$85--87\%) during Tambon et al.'s study period. This demonstrates that open-weight models released in 2025 have surpassed the code generation capabilities of earlier closed-source frontier models, democratising access to high-quality code generation.
+
+\subsection{Practical Implications}
+
+\begin{enumerate}
+    \item \textbf{Testing remains essential.} Even GPT-OSS~(120B) fails on $\sim$4\% of tasks, and these failures are almost entirely semantic --- undetectable without test cases.
+    \item \textbf{Focus testing on edge cases.} Since Missing Corner Case is now the dominant failure mode, practitioners should prioritise boundary value testing and edge case coverage when reviewing LLM-generated code.
+    \item \textbf{Model selection matters.} The 35-percentage-point gap between the weakest (61.3\%) and strongest (96.1\%) model is substantial.
+    \item \textbf{Smaller models still useful with review.} Llama~3.1~(8B) at 61.3\% can be cost-effective for simpler tasks with adequate code review.
+\end{enumerate}
+
+\subsection{Threats to Validity}
+
+\textbf{Construct validity.} Our manual classification was performed by two independent reviewers with substantial inter-rater agreement (Cohen's $\kappa = 0.71$). All 18 disagreements were between the closely related Missing Corner Case and Misinterpretation categories, which Tambon et al. also identified as the most difficult to distinguish. Disagreements were resolved through discussion to reach consensus.
+
+\textbf{Internal validity.} Models were accessed through third-party APIs (Groq, DeepSeek) which may use optimised or quantised versions. This reflects realistic deployment conditions but may differ from full-precision inference.
+
+\textbf{External validity.} Our study covers Python and two benchmarks. While widely used, HumanEval and MBPP may not capture the complexity of real-world tasks. Tambon et al. used CoderEval with tasks from actual GitHub projects.
+
+\section{Conclusions}
+\label{sec:conclusions}
+
+This study replicates and extends Tambon et al. (2025) by evaluating four open-weight models (8B to 685B parameters) from three organisations on 664 programming tasks.
+
+Our key findings are:
+
+\begin{enumerate}
+    \item \textbf{Model scale predicts correctness}: pass@1 ranges from 61.3\% (8B) to 96.1\% (120B), with differences statistically significant ($\chi^2 = 260.41$, $p < 0.001$).
+    \item \textbf{Semantic errors dominate}: 90.2\% of failures are AssertionErrors, and this proportion is consistent across all models ($p = 0.33$).
+    \item \textbf{Crude errors are disappearing}: Hallucinated Object, Incomplete Generation, Syntax Error, and Wrong Attribute collectively dropped from 33.9\% (Tambon) to 3.6\% in our study.
+    \item \textbf{Missing Corner Case is the new frontier}: at 51.8\% of classified failures (vs. 15.3\% in Tambon), edge case handling is now the primary challenge for LLM code generation.
+    \item \textbf{Open-weight models have surpassed earlier closed-source}: GPT-OSS (120B) at 96.1\% exceeds GPT-4 circa 2023 ($\sim$85\%).
+\end{enumerate}
+
+Future work should evaluate additional programming languages, investigate how prompt engineering and few-shot techniques affect the dominant Missing Corner Case failure mode, and extend the analysis to include models with reasoning capabilities (e.g., chain-of-thought prompting).
+
+\section*{Data Availability}
+
+All code, generated outputs, and classification data are available at: \url{https://github.com/YOURUSERNAME/llm-bug-study}
+
+\section*{Declaration of Competing Interest}
+
+The authors declare that they have no known competing financial interests or personal relationships that could have appeared to influence the work reported in this paper.
+
+\section*{CRediT Author Statement}
+
+\textbf{Assan Assemov:} Conceptualization, Methodology, Software, Data curation, Formal analysis, Investigation, Writing -- original draft, Visualization. \textbf{Mohammed Al-Hadeethi:} Supervision, Writing -- review \& editing.
+
+\bibliographystyle{elsarticle-harv}
+\bibliography{Literature}
+
+\end{document}

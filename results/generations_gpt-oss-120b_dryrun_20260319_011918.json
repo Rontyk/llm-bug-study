@@ -1,0 +1,38 @@
+[
+  {
+    "task_id": "HumanEval/0",
+    "benchmark": "humaneval",
+    "model": "gpt-oss-120b",
+    "generated_code": "def has_close_elements(numbers: List[float], threshold: float) -> bool:\n    if len(numbers) < 2:\n        return False\n    # Sort numbers to compare only neighboring elements\n    sorted_nums = sorted(numbers)\n    for i in range(len(sorted_nums) - 1):\n        if abs(sorted_nums[i + 1] - sorted_nums[i]) < threshold:\n            return True\n    return False",
+    "prompt": "from typing import List\n\n\ndef has_close_elements(numbers: List[float], threshold: float) -> bool:\n    \"\"\" Check if in given list of numbers, are any two numbers closer to each other than\n    given threshold.\n    >>> has_close_elements([1.0, 2.0, 3.0], 0.5)\n    False\n    >>> has_close_elements([1.0, 2.8, 3.0, 4.0, 5.0, 2.0], 0.3)\n    True\n    \"\"\"\n",
+    "latency_sec": 0.53,
+    "input_tokens": 217,
+    "output_tokens": 134,
+    "error": null,
+    "timestamp": "2026-03-19T01:19:11.504045"
+  },
+  {
+    "task_id": "HumanEval/1",
+    "benchmark": "humaneval",
+    "model": "gpt-oss-120b",
+    "generated_code": "from typing import List\n\ndef separate_paren_groups(paren_string: str) -> List[str]:\n    \"\"\"Separate top\u2011level balanced parenthesis groups from a string.\n\n    Spaces are ignored. Each returned group contains only '(' and ')'.\n    \"\"\"\n    groups: List[str] = []\n    current: List[str] = []\n    depth = 0\n\n    for ch in paren_string:\n        if ch == \" \":\n            continue\n        if ch == \"(\":\n            depth += 1\n            current.append(ch)\n        elif ch == \")\":\n            depth -= 1\n            current.append(ch)\n            if depth == 0:\n                groups.append(\"\".join(current))\n                current.clear()\n        else:\n            # ignore any other characters (optional, based on spec)\n            continue\n\n    return groups",
+    "prompt": "from typing import List\n\n\ndef separate_paren_groups(paren_string: str) -> List[str]:\n    \"\"\" Input to this function is a string containing multiple groups of nested parentheses. Your goal is to\n    separate those group into separate strings and return the list of those.\n    Separate groups are balanced (each open brace is properly closed) and not nested within each other\n    Ignore any spaces in the input string.\n    >>> separate_paren_groups('( ) (( )) (( )( ))')\n    ['()', '(())', '(()())']\n    \"\"\"\n",
+    "latency_sec": 0.96,
+    "input_tokens": 207,
+    "output_tokens": 395,
+    "error": null,
+    "timestamp": "2026-03-19T01:19:15.482943"
+  },
+  {
+    "task_id": "HumanEval/2",
+    "benchmark": "humaneval",
+    "model": "gpt-oss-120b",
+    "generated_code": "def truncate_number(number: float) -> float:\n    \"\"\"Return the decimal (fractional) part of a positive floating point number.\"\"\"\n    if number < 0:\n        raise ValueError(\"Number must be non-negative\")\n    return number - int(number)",
+    "prompt": "\n\ndef truncate_number(number: float) -> float:\n    \"\"\" Given a positive floating point number, it can be decomposed into\n    and integer part (largest integer smaller than given number) and decimals\n    (leftover part always smaller than 1).\n\n    Return the decimal part of the number.\n    >>> truncate_number(3.5)\n    0.5\n    \"\"\"\n",
+    "latency_sec": 0.435,
+    "input_tokens": 177,
+    "output_tokens": 128,
+    "error": null,
+    "timestamp": "2026-03-19T01:19:18.921697"
+  }
+]
